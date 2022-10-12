@@ -28,7 +28,7 @@ func (c AWSClientImpl) GetInstancesWithPrivateIP(ip string, nameKey string) []In
 	return instanceResults
 }
 
-func (c AWSClientImpl) GetInstancesWithPublicIP(ip string) []InstanceResult {
+func (c AWSClientImpl) GetInstancesWithPublicIP(ip string, nameKey string) []InstanceResult {
 	return nil
 }
 
