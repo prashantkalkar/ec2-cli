@@ -23,7 +23,7 @@ func tabPrintInstances(instances []InstanceResult) {
 	writer := getTabWriter()
 	_, _ = fmt.Fprintln(writer, "INSTANCE_ID\tNAME\tIP_ADDRESS\t")
 	for _, instance := range instances {
-		_, _ = fmt.Fprintln(writer, fmt.Sprintf("%s\t%s\t%s\t", instance.Id, instance.Name, instance.IP))
+		_, _ = fmt.Fprintf(writer, "%s\t%s\t%s\t\n", instance.Id, instance.Name, instance.IP)
 	}
 	_ = writer.Flush()
 }
