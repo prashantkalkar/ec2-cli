@@ -12,7 +12,6 @@ import (
 func TestGetInstancesWithPrivateIPWhenReservationsDoesNotExists(t *testing.T) {
 	//Given
 	var awsEc2Response = ec2.DescribeInstancesOutput{Reservations: []types.Reservation{}}
-
 	impl := AWSClientImpl{Client: mockDescribeInstances{awsEc2Response}}
 
 	//When
@@ -77,6 +76,45 @@ func TestGetInstancesWithPrivateIPWhenInstanceExistsWithNameTag(t *testing.T) {
 	assert.Equal(t, instanceId, instanceResult[0].Id)
 	assert.Equal(t, instanceIP, instanceResult[0].IP)
 	assert.Equal(t, instanceName, instanceResult[0].Name)
+}
+
+func TestGetInstancesWithPublicIPWhenReservationsDoesNotExists(t *testing.T) {
+	var awsEc2Response = ec2.DescribeInstancesOutput{Reservations: []types.Reservation{}}
+	impl := AWSClientImpl{Client: mockDescribeInstances{awsEc2Response}}
+
+	instanceResult := impl.GetInstancesWithPublicIP("172.16.102.42", "Name")
+
+	assert.Equal(t, 0, len(instanceResult))
+}
+
+func TestGetInstancesWithPublicIPWhenInstancesDoesNotExists(t *testing.T) {
+	var reservations = []types.Reservation{{Instances: []types.Instance{}}}
+	var awsEc2Response = ec2.DescribeInstancesOutput{Reservations: reservations}
+	impl := AWSClientImpl{Client: mockDescribeInstances{awsEc2Response}}
+
+	instanceResult := impl.GetInstancesWithPrivateIP("172.16.102.42", "Name")
+
+	assert.Equal(t, 0, len(instanceResult))
+}
+
+func TestGetInstancesWithPublicIPWhenInstanceExistsWithoutNameTag(t *testing.T) {
+	//Given
+	instanceId := "MyInstanceId"
+	instanceIP := "172.16.102.42"
+	instances := []types.Instance{{InstanceId: aws.String(instanceId), Tags: []types.Tag{}}}
+	var reservations = []types.Reservation{{Instances: instances}}
+	var awsEc2Response = ec2.DescribeInstancesOutput{Reservations: reservations}
+
+	impl := AWSClientImpl{Client: mockDescribeInstances{awsEc2Response}}
+
+	//When
+	instanceResult := impl.GetInstancesWithPublicIP(instanceIP, "Name")
+
+	//Then
+	assert.Equal(t, 1, len(instanceResult))
+	assert.Equal(t, instanceId, instanceResult[0].Id)
+	assert.Equal(t, instanceIP, instanceResult[0].IP)
+	assert.Equal(t, "", instanceResult[0].Name)
 }
 
 type mockDescribeInstances struct {

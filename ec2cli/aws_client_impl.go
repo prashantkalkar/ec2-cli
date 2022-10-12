@@ -17,7 +17,10 @@ type AWSClientImpl struct {
 }
 
 func (c AWSClientImpl) GetInstancesWithPrivateIP(ip string, nameKey string) []InstanceResult {
-	awsResult := c.getInstancesForPrivateIP(ip)
+	return c.ec2ResultToInstanceResult(ip, nameKey, c.getInstancesForPrivateIP(ip))
+}
+
+func (c AWSClientImpl) ec2ResultToInstanceResult(ip string, nameKey string, awsResult *ec2.DescribeInstancesOutput) []InstanceResult {
 	var instanceResults []InstanceResult
 	for _, reservation := range awsResult.Reservations {
 		for _, instance := range reservation.Instances {
@@ -29,7 +32,7 @@ func (c AWSClientImpl) GetInstancesWithPrivateIP(ip string, nameKey string) []In
 }
 
 func (c AWSClientImpl) GetInstancesWithPublicIP(ip string, nameKey string) []InstanceResult {
-	return nil
+	return c.ec2ResultToInstanceResult(ip, nameKey, c.getInstancesForPublicIP(ip))
 }
 
 func (c AWSClientImpl) GetInstancesWithTags(tagValues []string) []InstanceResult {
@@ -57,8 +60,24 @@ func (c AWSClientImpl) getInstancesForPrivateIP(privateIP string) *ec2.DescribeI
 	result, err := c.Client.DescribeInstances(context.TODO(), &ec2.DescribeInstancesInput{
 		Filters: []types.Filter{
 			{
-				Name:   aws.String("network-interface.addresses.private-ip-address"),
+				Name:   aws.String("private-ip-address"),
 				Values: []string{privateIP},
+			},
+		},
+	})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	return result
+}
+
+func (c AWSClientImpl) getInstancesForPublicIP(publicIP string) *ec2.DescribeInstancesOutput {
+	result, err := c.Client.DescribeInstances(context.TODO(), &ec2.DescribeInstancesInput{
+		Filters: []types.Filter{
+			{
+				Name:   aws.String("ip-address"),
+				Values: []string{publicIP},
 			},
 		},
 	})
