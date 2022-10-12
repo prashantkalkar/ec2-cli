@@ -41,13 +41,22 @@ func (c AWSClientImpl) GetAllInstances(nameKey string) []InstanceResult {
 
 func ExtractInstanceResult(instance types.Instance, ip string, nameKey string) InstanceResult {
 	return InstanceResult{
-		Id:   *instance.InstanceId,
-		Name: GetInstanceName(instance, nameKey),
-		IP:   ip,
+		Id:        *instance.InstanceId,
+		Name:      getInstanceName(instance, nameKey),
+		IP:        ip,
+		TagValues: getInstanceTagValues(instance),
 	}
 }
 
-func GetInstanceName(instance types.Instance, nameKey string) string {
+func getInstanceTagValues(instance types.Instance) []string {
+	var tagValues []string
+	for _, tag := range instance.Tags {
+		tagValues = append(tagValues, *tag.Value)
+	}
+	return tagValues
+}
+
+func getInstanceName(instance types.Instance, nameKey string) string {
 	for _, tag := range instance.Tags {
 		if nameKey == *tag.Key {
 			return *tag.Value
