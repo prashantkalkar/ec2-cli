@@ -72,6 +72,7 @@ func testAWSClientWithPublicIP(ip string, expectedInstanceIds []string) TestAWSC
 type TestAWSClient struct {
 	ExpectedPrivateResult []InstanceResult
 	ExpectedPublicResult  []InstanceResult
+	AllInstancesResult    []InstanceResult
 }
 
 func (t TestAWSClient) GetInstancesWithPrivateIP(_ string, _ string) []InstanceResult {
@@ -82,7 +83,6 @@ func (t TestAWSClient) GetInstancesWithPublicIP(_ string, _ string) []InstanceRe
 	return t.ExpectedPublicResult
 }
 
-func (t TestAWSClient) GetInstancesWithTags(_ []string) []InstanceResult {
-	//TODO implement me
-	panic("implement me")
+func (t TestAWSClient) GetAllInstances(_ string) []InstanceResult {
+	return t.AllInstancesResult
 }

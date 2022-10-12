@@ -17,14 +17,14 @@ type AWSClientImpl struct {
 }
 
 func (c AWSClientImpl) GetInstancesWithPrivateIP(ip string, nameKey string) []InstanceResult {
-	return c.ec2ResultToInstanceResult(ip, nameKey, c.getInstancesForPrivateIP(ip))
+	return c.ec2ResultToInstanceResult(func(instance types.Instance) string { return ip }, nameKey, c.getInstancesForPrivateIP(ip))
 }
 
-func (c AWSClientImpl) ec2ResultToInstanceResult(ip string, nameKey string, awsResult *ec2.DescribeInstancesOutput) []InstanceResult {
+func (c AWSClientImpl) ec2ResultToInstanceResult(ipfunc func(instance types.Instance) string, nameKey string, awsResult *ec2.DescribeInstancesOutput) []InstanceResult {
 	var instanceResults []InstanceResult
 	for _, reservation := range awsResult.Reservations {
 		for _, instance := range reservation.Instances {
-			instanceResults = append(instanceResults, ExtractInstanceResult(instance, ip, nameKey))
+			instanceResults = append(instanceResults, ExtractInstanceResult(instance, ipfunc(instance), nameKey))
 		}
 	}
 
@@ -32,11 +32,11 @@ func (c AWSClientImpl) ec2ResultToInstanceResult(ip string, nameKey string, awsR
 }
 
 func (c AWSClientImpl) GetInstancesWithPublicIP(ip string, nameKey string) []InstanceResult {
-	return c.ec2ResultToInstanceResult(ip, nameKey, c.getInstancesForPublicIP(ip))
+	return c.ec2ResultToInstanceResult(func(instance types.Instance) string { return ip }, nameKey, c.getInstancesForPublicIP(ip))
 }
 
-func (c AWSClientImpl) GetInstancesWithTags(tagValues []string) []InstanceResult {
-	return nil
+func (c AWSClientImpl) GetAllInstances(nameKey string) []InstanceResult {
+	return c.ec2ResultToInstanceResult(func(instance types.Instance) string { return *instance.PrivateIpAddress }, nameKey, c.getAllInstances())
 }
 
 func ExtractInstanceResult(instance types.Instance, ip string, nameKey string) InstanceResult {
@@ -81,6 +81,15 @@ func (c AWSClientImpl) getInstancesForPublicIP(publicIP string) *ec2.DescribeIns
 			},
 		},
 	})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	return result
+}
+
+func (c AWSClientImpl) getAllInstances() *ec2.DescribeInstancesOutput {
+	result, err := c.Client.DescribeInstances(context.TODO(), nil)
 
 	if err != nil {
 		log.Fatal(err)

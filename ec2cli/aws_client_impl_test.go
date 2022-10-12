@@ -117,6 +117,22 @@ func TestGetInstancesWithPublicIPWhenInstanceExistsWithoutNameTag(t *testing.T) 
 	assert.Equal(t, "", instanceResult[0].Name)
 }
 
+func TestGetAllInstances(t *testing.T) {
+	instanceId := "MyInstanceId"
+	instanceIP := "172.16.102.42"
+	instances := []types.Instance{{InstanceId: aws.String(instanceId), PrivateIpAddress: aws.String(instanceIP)}}
+	var reservations = []types.Reservation{{Instances: instances}}
+	var awsEc2Response = ec2.DescribeInstancesOutput{Reservations: reservations}
+	impl := AWSClientImpl{Client: mockDescribeInstances{awsEc2Response}}
+
+	allInstances := impl.GetAllInstances("Name")
+
+	assert.Equal(t, 1, len(allInstances))
+	assert.Equal(t, instanceId, allInstances[0].Id)
+	assert.Equal(t, instanceIP, allInstances[0].IP)
+	assert.Equal(t, "", allInstances[0].Name)
+}
+
 type mockDescribeInstances struct {
 	describeInstancesOutput ec2.DescribeInstancesOutput
 }
