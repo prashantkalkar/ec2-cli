@@ -9,6 +9,8 @@ import (
 	"github.com/prashantkalkar/ec2-cli/ec2cli"
 	"github.com/spf13/cobra"
 	"log"
+	"os"
+	"text/tabwriter"
 )
 
 func main() {
@@ -20,10 +22,22 @@ func main() {
 		Long:  `Find ec2 instances, matching ip address or tags. If non found empty result is shown.`,
 		Args:  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
-			ids := ec2cli.FindEC2InstanceIds(ec2IP, ec2cli.AWSClientImpl{Client: getAWSEC2Client()})
-			for _, id := range ids {
-				fmt.Println(id)
+			if getId {
+				ids := ec2cli.FindEC2InstanceIds(ec2IP, ec2cli.AWSClientImpl{Client: getAWSEC2Client()})
+				for _, id := range ids {
+					fmt.Println(id)
+					return
+				}
 			}
+
+			instances := ec2cli.FindEC2Instances(ec2IP, ec2cli.AWSClientImpl{Client: getAWSEC2Client()})
+			writer := tabwriter.NewWriter(os.Stdout, 1, 1, 1, ' ', 0)
+			_, _ = fmt.Fprintln(writer, "INSTANCE_ID\tNAME\tIP_ADDRESS\t")
+			for _, instance := range instances {
+				instanceStr := fmt.Sprintf("%s\t%s\t%s\t\n", instance.Id, instance.Name, instance.IP)
+				_, _ = fmt.Fprintln(writer, instanceStr)
+			}
+			_ = writer.Flush()
 		},
 	}
 
