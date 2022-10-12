@@ -29,7 +29,7 @@ func tabPrintInstances(instances []InstanceResult) {
 }
 
 func getTabWriter() *tabwriter.Writer {
-	return tabwriter.NewWriter(os.Stdout, 1, 1, 1, ' ', 0)
+	return tabwriter.NewWriter(os.Stdout, 1, 1, 5, ' ', 0)
 }
 
 func printInstanceIds(fetchIds func() []string) {

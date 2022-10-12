@@ -128,6 +128,46 @@ func TestShouldProvideOnlyInstancesWhenInstancesMatchTagMultiSearchTag(t *testin
 	assert.Equal(t, "172.168.20.1", instances[1].IP)
 }
 
+func TestShouldMatchTagCaseInsensitively(t *testing.T) {
+	nonMatchingInstances := getInstanceResultsWithTagValues(2, "NonInstanceId",
+		10, []string{"otherTag1", "otherTag2"})
+	matchingTagInstances := getInstanceResultsWithTagValues(2, "instanceId",
+		0, []string{"TagV1", "TAGV2", "tAgV3"})
+	client := testAWSClientWithAllInstances(nonMatchingInstances, matchingTagInstances)
+	// When
+	instances := FindEC2InstancesByTagValues([]string{"tagV1", "tagV2"}, client)
+	// Then
+	assert.Equal(t, 2, len(instances))
+	assert.Equal(t, "instanceId-0", instances[0].Id)
+	assert.Equal(t, "instanceId-1", instances[1].Id)
+
+	assert.Equal(t, "", instances[0].Name)
+	assert.Equal(t, "", instances[1].Name)
+
+	assert.Equal(t, "172.168.20.0", instances[0].IP)
+	assert.Equal(t, "172.168.20.1", instances[1].IP)
+}
+
+func TestShouldMatchInstanceTagPartially(t *testing.T) {
+	nonMatchingInstances := getInstanceResultsWithTagValues(2, "NonInstanceId",
+		10, []string{"otherTag1", "otherTag2"})
+	matchingTagInstances := getInstanceResultsWithTagValues(2, "instanceId",
+		0, []string{"SomeTagV1thing", "sTAGV2omething", "tAgV3"})
+	client := testAWSClientWithAllInstances(nonMatchingInstances, matchingTagInstances)
+	// When
+	instances := FindEC2InstancesByTagValues([]string{"tagV1", "tagV2"}, client)
+	// Then
+	assert.Equal(t, 2, len(instances))
+	assert.Equal(t, "instanceId-0", instances[0].Id)
+	assert.Equal(t, "instanceId-1", instances[1].Id)
+
+	assert.Equal(t, "", instances[0].Name)
+	assert.Equal(t, "", instances[1].Name)
+
+	assert.Equal(t, "172.168.20.0", instances[0].IP)
+	assert.Equal(t, "172.168.20.1", instances[1].IP)
+}
+
 func testAWSClientWithAllInstances(instanceGroup1 []InstanceResult, instanceGroup2 []InstanceResult) TestAWSClient {
 	return TestAWSClient{AllInstancesResult: append(instanceGroup1, instanceGroup2...)}
 }

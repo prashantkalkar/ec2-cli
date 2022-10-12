@@ -9,6 +9,7 @@ func PrintInstancesByTags(getId bool, searchTags []string) {
 	// print ids if required
 	if getId {
 		printInstanceIdsByTag(instances)
+		return
 	}
 
 	// print tabs if required

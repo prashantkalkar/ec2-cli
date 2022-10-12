@@ -1,6 +1,6 @@
 package ec2cli
 
-import "golang.org/x/exp/slices"
+import "strings"
 
 func FindEC2Instances(ip string, client AWSClient) []InstanceResult {
 	privateIPResult := client.GetInstancesWithPrivateIP(ip, "Name")
@@ -33,9 +33,18 @@ func findInstancesForNonEmptySearchTags(tagValues []string, client AWSClient) []
 
 func hasTagValues(instance InstanceResult, values []string) bool {
 	for _, value := range values {
-		if !slices.Contains(instance.TagValues, value) {
+		if !tagContains(instance.TagValues, value) {
 			return false
 		}
 	}
 	return true
+}
+
+func tagContains(tagValues []string, searchValue string) bool {
+	for _, tagValue := range tagValues {
+		if strings.Contains(strings.ToLower(tagValue), strings.ToLower(searchValue)) {
+			return true
+		}
+	}
+	return false
 }
