@@ -7,7 +7,7 @@ func TestShouldListEC2InstancesIdsByPrivateIP(t *testing.T) {
 	// Given
 	expectedInstanceId := []string{"InstanceId"}
 	// When
-	instanceIds, _ := FindEC2InstanceIds(testIP(), testAWSClientWithPrivateIP(testIP(), expectedInstanceId))
+	instanceIds := FindEC2InstanceIds(testIP(), testAWSClientWithPrivateIP(testIP(), expectedInstanceId))
 	// then
 	assert.Equal(t, expectedInstanceId, instanceIds, "they should be equal")
 }
@@ -16,7 +16,7 @@ func TestShouldListEC2InstanceIdsByPublicIP(t *testing.T) {
 	// Given
 	expectedInstanceId := []string{"instanceId"}
 	// When
-	instanceIds, _ := FindEC2InstanceIds(testIP(), testAWSClientWithPublicIP(testIP(), expectedInstanceId))
+	instanceIds := FindEC2InstanceIds(testIP(), testAWSClientWithPublicIP(testIP(), expectedInstanceId))
 	// then
 	assert.Equal(t, expectedInstanceId, instanceIds, "they should be equal")
 }
@@ -24,7 +24,7 @@ func TestShouldListEC2InstanceIdsByPublicIP(t *testing.T) {
 func TestShouldReturnEmptyResultInstanceNotFound(t *testing.T) {
 	// Given
 	// When
-	instanceIds, _ := FindEC2InstanceIds(testIP(), TestAWSClient{})
+	instanceIds := FindEC2InstanceIds(testIP(), TestAWSClient{})
 	// then
 	assert.Equal(t, 0, len(instanceIds))
 }
@@ -34,7 +34,7 @@ func TestShouldReturnMultipleInstancesWhenFoundForPrivateIPs(t *testing.T) {
 	// Given
 	expectedInstanceId := []string{"InstanceId1", "InstanceId2"}
 	// When
-	instanceIds, _ := FindEC2InstanceIds(testIP(), testAWSClientWithPrivateIP(testIP(), expectedInstanceId))
+	instanceIds := FindEC2InstanceIds(testIP(), testAWSClientWithPrivateIP(testIP(), expectedInstanceId))
 	// then
 	assert.Equal(t, expectedInstanceId, instanceIds, "they should be equal")
 }
@@ -44,7 +44,7 @@ func TestShouldReturnMultipleInstancesWhenFoundForPublicIPs(t *testing.T) {
 	// Given
 	expectedInstanceId := []string{"InstanceId1", "InstanceId2"}
 	// When
-	instanceIds, _ := FindEC2InstanceIds(testIP(), testAWSClientWithPublicIP(testIP(), expectedInstanceId))
+	instanceIds := FindEC2InstanceIds(testIP(), testAWSClientWithPublicIP(testIP(), expectedInstanceId))
 	// then
 	assert.Equal(t, expectedInstanceId, instanceIds, "they should be equal")
 }

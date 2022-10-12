@@ -1,15 +1,15 @@
 package ec2cli
 
-func FindEC2InstanceIds(ip string, client AWSClient) ([]string, error) {
+func FindEC2InstanceIds(ip string, client AWSClient) []string {
 	privateIPResult := client.GetInstancesWithPrivateIP(ip, "Name")
 	if len(privateIPResult) > 0 {
-		return getInstanceIds(privateIPResult), nil
+		return getInstanceIds(privateIPResult)
 	}
 	publicIPResult := client.GetInstancesWithPublicIP(ip)
 	if len(publicIPResult) > 0 {
-		return getInstanceIds(publicIPResult), nil
+		return getInstanceIds(publicIPResult)
 	}
-	return []string{}, nil
+	return []string{}
 }
 
 func getInstanceIds(result []InstanceResult) []string {

@@ -20,11 +20,10 @@ func main() {
 		Long:  `Find ec2 instances, matching ip address or tags. If non found empty result is shown.`,
 		Args:  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
-			id, err := ec2cli.FindEC2InstanceIds(ec2IP, ec2cli.AWSClientImpl{Client: getAWSEC2Client()})
-			if err != nil {
-				log.Fatal(err)
+			ids := ec2cli.FindEC2InstanceIds(ec2IP, ec2cli.AWSClientImpl{Client: getAWSEC2Client()})
+			for _, id := range ids {
+				fmt.Println(id)
 			}
-			fmt.Println(id)
 		},
 	}
 
