@@ -22,5 +22,11 @@ build: test
 
 dist:
 	GOOS=darwin GOARCH=amd64 go build -o ./darwin/amd64/ec2-cli .
+	GOOS=darwin GOARCH=amd64 go build -o ./ec2-cli-darwin-amd64 .
+
 	GOOS=linux GOARCH=amd64 go build -o ./linux/amd64/ec2-cli .
+	GOOS=linux GOARCH=amd64 go build -o ./ec2-cli-linux-amd64 .
+
+	GOOS=darwin GOARCH=arm64 go build -o ./darwin/arm64/ec2-cli .
+	GOOS=darwin GOARCH=arm64 go build -o ./ec2-cli-darwin-arm64 .
 .PHONY:dist
