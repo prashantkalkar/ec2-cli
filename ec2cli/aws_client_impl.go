@@ -2,6 +2,7 @@ package ec2cli
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
@@ -13,7 +14,8 @@ type Ec2api interface {
 }
 
 type AWSClientImpl struct {
-	Client Ec2api
+	Client  Ec2api
+	Verbose bool
 }
 
 func (c AWSClientImpl) GetInstancesWithPrivateIP(ip string, nameKey string) []InstanceResult {
@@ -24,6 +26,10 @@ func (c AWSClientImpl) ec2ResultToInstanceResult(ipfunc func(instance types.Inst
 	var instanceResults []InstanceResult
 	for _, reservation := range awsResult.Reservations {
 		for _, instance := range reservation.Instances {
+			if c.Verbose {
+				str, _ := PrettyStruct(instance)
+				log.Printf("Converting instance details in instance result: %s", str)
+			}
 			instanceResults = append(instanceResults, ExtractInstanceResult(instance, ipfunc(instance), nameKey))
 		}
 	}
@@ -35,8 +41,21 @@ func (c AWSClientImpl) GetInstancesWithPublicIP(ip string, nameKey string) []Ins
 	return c.ec2ResultToInstanceResult(func(instance types.Instance) string { return ip }, nameKey, c.getInstancesForPublicIP(ip))
 }
 
+func PrettyStruct(data interface{}) (string, error) {
+	val, err := json.MarshalIndent(data, "", "    ")
+	if err != nil {
+		return "", err
+	}
+	return string(val), nil
+}
+
 func (c AWSClientImpl) GetAllInstances(nameKey string) []InstanceResult {
-	return c.ec2ResultToInstanceResult(func(instance types.Instance) string { return *instance.PrivateIpAddress }, nameKey, c.getAllInstances())
+	instances := c.getAllInstances()
+	if c.Verbose {
+		str, _ := PrettyStruct(instances)
+		log.Printf("Found instances, before filtering: %s", str)
+	}
+	return c.ec2ResultToInstanceResult(func(instance types.Instance) string { return *instance.PrivateIpAddress }, nameKey, instances)
 }
 
 func ExtractInstanceResult(instance types.Instance, ip string, nameKey string) InstanceResult {

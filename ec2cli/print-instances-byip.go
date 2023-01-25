@@ -11,9 +11,11 @@ import (
 	"text/tabwriter"
 )
 
-func PrintInstancesByIP(getId bool, ec2IP string) {
+func PrintInstancesByIP(getId bool, ec2IP string, verbose bool) {
 	if getId {
-		printInstanceIds(func() []string { return FindEC2InstanceIds(ec2IP, AWSClientImpl{Client: getAWSEC2Client()}) })
+		printInstanceIds(func() []string {
+			return FindEC2InstanceIds(ec2IP, AWSClientImpl{Client: getAWSEC2Client(), Verbose: verbose})
+		})
 		return
 	}
 	tabPrintInstances(FindEC2Instances(ec2IP, AWSClientImpl{Client: getAWSEC2Client()}))

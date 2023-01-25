@@ -9,6 +9,7 @@ import (
 func main() {
 	var ec2IP string
 	var getId bool
+	var verbose bool
 	var searchTags []string
 	var cmdFindEC2 = &cobra.Command{
 		Use:   "ec2-cli [flags]",
@@ -17,17 +18,18 @@ func main() {
 		Args:  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(ec2IP) > 0 {
-				ec2cli.PrintInstancesByIP(getId, ec2IP)
+				ec2cli.PrintInstancesByIP(getId, ec2IP, verbose)
 				return
 			}
 			if len(searchTags) > 0 {
-				ec2cli.PrintInstancesByTags(getId, searchTags)
+				ec2cli.PrintInstancesByTags(getId, searchTags, verbose)
 			}
 		},
 	}
 
 	cmdFindEC2.Flags().StringVarP(&ec2IP, "ip", "p", "", "Provide public or private ip")
 	cmdFindEC2.Flags().BoolVarP(&getId, "id", "i", false, "Provide only instance Id (default false)")
+	cmdFindEC2.Flags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose logs (default false)")
 	cmdFindEC2.Flags().StringSliceVarP(&searchTags, "tags", "t", []string{}, "Provide tags to be matched for instances")
 	cmdFindEC2.MarkFlagsMutuallyExclusive("ip", "tags")
 
