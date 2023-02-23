@@ -159,4 +159,6 @@ Temporary Items
 .apdisk
 
 ec2-cli
-
+ec2-cli-darwin-amd64
+ec2-cli-darwin-arm64
+ec2-cli-linux-amd64
