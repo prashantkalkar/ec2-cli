@@ -117,7 +117,8 @@ func (c AWSClientImpl) getInstancesForPublicIP(publicIP string) *ec2.DescribeIns
 }
 
 func (c AWSClientImpl) getAllInstances() *ec2.DescribeInstancesOutput {
-	result, err := c.Client.DescribeInstances(context.TODO(), nil)
+	var runningInstancesFilter = []types.Filter{{Name: aws.String("instance-state-name"), Values: []string{"running"}}}
+	result, err := c.Client.DescribeInstances(context.TODO(), &ec2.DescribeInstancesInput{Filters: runningInstancesFilter})
 
 	if err != nil {
 		log.Fatal(err)
